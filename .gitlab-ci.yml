@@ -1,0 +1,26 @@
+stages:
+  - test
+  - build
+
+unittest: 
+  stage: test
+  image: python:3-slim
+  script: 
+    - pip install - requirements.txt
+    - python3 -m unittest discover
+  tags:
+    - docker
+
+Docker build:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:/${CI_COMMIT_REF_SLUG} .
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:/${CI_COMMIT_REF_SLUG}
+  tags:
+    - docker
+
+
